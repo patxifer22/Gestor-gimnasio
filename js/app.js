@@ -1707,8 +1707,11 @@ function computeMuscleLevels() {
         const w = parseFloat(s.weight) || 0;
         const r = parseInt(s.reps) || 0;
         if (r <= 0) return;
+        // Carga efectiva: peso anadido + fraccion del peso corporal cuando el
+        // cuerpo es parte de la resistencia (sentadilla, zancadas, gemelos de pie...)
         // Epley con tope de 12 reps para no inflar el 1RM en series altas
-        const metric = std.type === 'reps' ? r : w * (1 + Math.min(r, 12) / 30);
+        const effectiveLoad = w + (std.bw || 0) * bw;
+        const metric = std.type === 'reps' ? r : effectiveLoad * (1 + Math.min(r, 12) / 30);
         const prev = bestByKey[std.id];
         if (!prev || metric > prev.metric) {
           bestByKey[std.id] = { metric: metric, name: ex.name, muscle: ex.muscle || std.muscle, std: std };

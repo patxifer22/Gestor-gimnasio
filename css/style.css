@@ -1080,6 +1080,13 @@ html, body {
   flex: 1;
 }
 
+.form-hint {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  margin-top: 5px;
+  line-height: 1.4;
+}
+
 /* Quick selector chips in modals (e.g., muscles) */
 .chip-group {
   display: flex;

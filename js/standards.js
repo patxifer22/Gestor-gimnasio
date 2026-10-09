@@ -8,6 +8,15 @@
  *                 contra el 1RM estimado (formula de Epley: peso * (1 + reps/30))
  * - type 'reps' : umbrales absolutos de repeticiones (ejercicios con el
  *                 peso corporal: dominadas, fondos, plancha...)
+ * - bw          : fraccion del peso corporal que se SUMA a la carga externa
+ *                 (sentadilla: 1 = todo el cuerpo, zancadas/bulgara: 0.5 = una
+ *                  pierna, gemelos de pie: 1, gemelos sentados: 0, resto: 0)
+ *
+ * CONVENCIONES de lo que registra el usuario:
+ * - Ejercicios con mancuernas: el peso es el de UNA mancuerna (por mano)
+ * - Ejercicios donde el cuerpo es parte de la carga (sentadilla, zancadas,
+ *   gemelos de pie): se registra SOLO el peso anadido; el peso corporal
+ *   se suma automaticamente al calcular el nivel
  *
  * "Intermedio" representa aproximadamente la media de personas entrenadas.
  *
@@ -67,12 +76,13 @@ const STRENGTH_STANDARDS = [
   { id: 'crunch', match: ['crunch', 'abdominal'], muscle: 'Core', type: 'orm', b: [0.25, 0.4, 0.55, 0.8] },
 
   // ===================== PIERNA =====================
-  { id: 'lunge', match: ['zancada', 'bulgara', 'lunge'], muscle: 'Pierna', type: 'orm', b: [0.15, 0.25, 0.35, 0.5] },
-  { id: 'squat', match: ['sentadilla', 'squat'], muscle: 'Pierna', type: 'orm', b: [0.7, 1.1, 1.5, 2.0] },
+  { id: 'lunge', match: ['zancada', 'bulgara', 'lunge'], muscle: 'Pierna', type: 'orm', bw: 0.5, b: [0.75, 0.85, 0.95, 1.1] },
+  { id: 'squat', match: ['sentadilla', 'squat'], muscle: 'Pierna', type: 'orm', bw: 1, b: [1.9, 2.3, 2.7, 3.2] },
   { id: 'leg-press', match: ['prensa', 'leg press'], muscle: 'Pierna', type: 'orm', b: [1.4, 2.2, 3.0, 4.0] },
   { id: 'leg-extension', match: ['cuadriceps', 'leg extension'], muscle: 'Pierna', type: 'orm', b: [0.4, 0.65, 0.9, 1.2] },
   { id: 'hip-thrust', match: ['hip thrust', 'hipthrust', 'puente de gluteo'], muscle: 'Pierna', type: 'orm', b: [0.9, 1.5, 2.2, 3.0] },
-  { id: 'calf', match: ['gemelo', 'talon', 'pantorrilla', 'calf'], muscle: 'Pierna', type: 'orm', b: [0.6, 1.0, 1.4, 1.9] }
+  { id: 'calf-seated', match: ['gemelos sentado', 'gemelo sentado', 'talones sentado', 'talon sentado', 'seated calf'], muscle: 'Pierna', type: 'orm', b: [0.6, 1.0, 1.4, 1.9] },
+  { id: 'calf', match: ['gemelo', 'talon', 'pantorrilla', 'calf'], muscle: 'Pierna', type: 'orm', bw: 1, b: [1.8, 2.2, 2.6, 3.1] }
 ];
 
 // Normaliza un nombre de ejercicio: minusculas, sin acentos, espacios simples
