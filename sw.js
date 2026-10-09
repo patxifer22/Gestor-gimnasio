@@ -1,9 +1,10 @@
-const CACHE_NAME = 'fittrack-v2';
+const CACHE_NAME = 'fittrack-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './css/style.css',
   './js/app.js',
+  './js/standards.js',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',

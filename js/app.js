@@ -316,7 +316,7 @@ class AppState {
     const saved = localStorage.getItem('fittrack_settings');
     if (saved) {
       try {
-        return Object.assign({ sound: true, vibrate: true, defaultRest: 90 }, JSON.parse(saved));
+        return Object.assign({ sound: true, vibrate: true, defaultRest: 90, bodyweight: 75 }, JSON.parse(saved));
       } catch (e) {
         console.error('Error reading settings', e);
       }
@@ -324,7 +324,8 @@ class AppState {
     return {
       sound: true,
       vibrate: true,
-      defaultRest: 90
+      defaultRest: 90,
+      bodyweight: 75
     };
   }
 
@@ -460,6 +461,11 @@ const DOM = {
   statTotalTime: document.getElementById('stat-total-time'),
   historyTotalCount: document.getElementById('history-total-count'),
   historyList: document.getElementById('history-list'),
+
+  // Levels tab (muscle map)
+  levelBodyweight: document.getElementById('level-bodyweight'),
+  levelsOverview: document.getElementById('levels-overview'),
+  muscleLevelsList: document.getElementById('muscle-levels-list'),
 
   // Settings tab
   settingSound: document.getElementById('setting-sound'),
@@ -626,6 +632,8 @@ function switchTab(tabId) {
     renderWorkoutTab();
   } else if (tabId === 'tab-history') {
     renderHistoryTab();
+  } else if (tabId === 'tab-levels') {
+    renderLevelsTab();
   } else if (tabId === 'tab-settings') {
     renderSettingsTab();
   }
@@ -1665,6 +1673,151 @@ DOM.btnDeleteHistoryItem.addEventListener('click', () => {
 });
 
 // ============================================================
+// TAB 5: MUSCLE MAP & STRENGTH LEVELS
+// ============================================================
+
+// Grupos musculares representados en la figura (Cardio no tiene región)
+const MUSCLE_ORDER = ['Pecho', 'Espalda', 'Hombro', 'Bíceps', 'Tríceps', 'Pierna', 'Core'];
+
+// Devuelve el nivel (1-5) de una marca según el estándar del ejercicio
+function levelForStandard(std, metric, bodyweight) {
+  let level = 1;
+  std.b.forEach((t, i) => {
+    const threshold = std.type === 'reps' ? t : t * bodyweight;
+    if (metric >= threshold) level = i + 2;
+  });
+  return level;
+}
+
+// Recorre el historial y calcula el nivel alcanzado por grupo muscular.
+// Devuelve { 'Pecho': { level, best }, ... } (null si no hay datos del grupo)
+function computeMuscleLevels() {
+  const bw = parseFloat(state.settings.bodyweight) || 75;
+  const groups = {};
+  MUSCLE_ORDER.forEach(m => { groups[m] = null; });
+
+  // Mejor marca por ejercicio (clave = id del estándar)
+  const bestByKey = {};
+  (state.history || []).forEach(rec => {
+    (rec.exercises || []).forEach(ex => {
+      const std = findStrengthStandard(ex.name);
+      if (!std) return;
+      (ex.sets || []).forEach(s => {
+        if (!s.completed) return;
+        const w = parseFloat(s.weight) || 0;
+        const r = parseInt(s.reps) || 0;
+        if (r <= 0) return;
+        // Epley con tope de 12 reps para no inflar el 1RM en series altas
+        const metric = std.type === 'reps' ? r : w * (1 + Math.min(r, 12) / 30);
+        const prev = bestByKey[std.id];
+        if (!prev || metric > prev.metric) {
+          bestByKey[std.id] = { metric: metric, name: ex.name, muscle: ex.muscle || std.muscle, std: std };
+        }
+      });
+    });
+  });
+
+  // Agregar por grupo muscular (gana el nivel más alto del grupo)
+  Object.keys(bestByKey).forEach(key => {
+    const entry = bestByKey[key];
+    let muscle = MUSCLE_ORDER.indexOf(entry.muscle) !== -1 ? entry.muscle : entry.std.muscle;
+    if (MUSCLE_ORDER.indexOf(muscle) === -1) return;
+    const level = levelForStandard(entry.std, entry.metric, bw);
+    const current = groups[muscle];
+    if (!current || level > current.level) {
+      groups[muscle] = { level: level, best: entry };
+    }
+  });
+
+  return groups;
+}
+
+function renderLevelsTab() {
+  DOM.levelBodyweight.value = state.settings.bodyweight || 75;
+  const levels = computeMuscleLevels();
+
+  // Colorear las regiones de las figuras SVG
+  document.querySelectorAll('#tab-levels .body-muscle').forEach(el => {
+    const info = levels[el.dataset.muscle];
+    el.style.fill = info ? STRENGTH_LEVELS[info.level - 1].color : '';
+    el.classList.toggle('no-data', !info);
+  });
+
+  // Nivel global (media de los grupos con datos)
+  const withData = Object.keys(levels).map(k => levels[k]).filter(Boolean);
+  if (withData.length > 0) {
+    const avg = withData.reduce((a, c) => a + c.level, 0) / withData.length;
+    const overall = STRENGTH_LEVELS[Math.max(0, Math.round(avg) - 1)];
+    DOM.levelsOverview.innerHTML = `Nivel global: <strong style="color:${overall.color}">${escapeHtml(overall.name)}</strong>`;
+  } else {
+    DOM.levelsOverview.textContent = 'Sin datos todavía: completa tu primer entrenamiento para ver tus niveles.';
+  }
+
+  // Listado por grupo muscular
+  DOM.muscleLevelsList.innerHTML = '';
+
+  MUSCLE_ORDER.forEach(muscle => {
+    const info = levels[muscle];
+    const card = document.createElement('div');
+    card.className = 'muscle-level-card';
+
+    if (info) {
+      const lvl = STRENGTH_LEVELS[info.level - 1];
+      const metricText = info.best.std.type === 'reps'
+        ? `${info.best.metric} reps`
+        : `1RM est. ${Math.round(info.best.metric)} kg`;
+
+      let dots = '';
+      for (let i = 1; i <= 5; i++) {
+        if (i <= info.level) {
+          dots += `<span class="level-dot" style="background:${lvl.color}; border-color:${lvl.color};"></span>`;
+        } else {
+          dots += `<span class="level-dot"></span>`;
+        }
+      }
+
+      card.innerHTML = `
+        <div class="muscle-level-info">
+          <div class="muscle-level-name">${escapeHtml(muscle)}</div>
+          <div class="muscle-level-best">${escapeHtml(info.best.name)} · ${escapeHtml(metricText)}</div>
+        </div>
+        <div class="muscle-level-right">
+          <span class="level-dots">${dots}</span>
+          <span class="level-label" style="color:${lvl.color}">${lvl.name}</span>
+        </div>
+      `;
+    } else {
+      card.innerHTML = `
+        <div class="muscle-level-info">
+          <div class="muscle-level-name">${escapeHtml(muscle)}</div>
+          <div class="muscle-level-best">Sin registros de ejercicios con estándar conocido</div>
+        </div>
+        <div class="muscle-level-right">
+          <span class="level-dots">${'<span class="level-dot"></span>'.repeat(5)}</span>
+          <span class="level-label" style="color:var(--text-dim);">Sin datos</span>
+        </div>
+      `;
+    }
+
+    DOM.muscleLevelsList.appendChild(card);
+  });
+}
+
+// Cambio de peso corporal → recalcular niveles
+DOM.levelBodyweight.addEventListener('change', () => {
+  const bw = parseFloat(DOM.levelBodyweight.value);
+  if (bw >= 30 && bw <= 300) {
+    state.settings.bodyweight = bw;
+  } else {
+    state.settings.bodyweight = 75;
+    DOM.levelBodyweight.value = 75;
+  }
+  state.saveSettings();
+  renderLevelsTab();
+  showToast('Niveles recalculados para ' + state.settings.bodyweight + ' kg');
+});
+
+// ============================================================
 // TAB 4: SETTINGS & BACKUP/RESTORE
 // ============================================================
 
@@ -1726,12 +1879,14 @@ function isValidRoutineDay(day) {
 }
 
 function sanitizeSettings(raw) {
-  const s = { sound: true, vibrate: true, defaultRest: 90 };
+  const s = { sound: true, vibrate: true, defaultRest: 90, bodyweight: 75 };
   if (!raw || typeof raw !== 'object') return s;
   if (typeof raw.sound === 'boolean') s.sound = raw.sound;
   if (typeof raw.vibrate === 'boolean') s.vibrate = raw.vibrate;
   const rest = parseInt(raw.defaultRest);
   if ([45, 60, 90, 120, 180].indexOf(rest) !== -1) s.defaultRest = rest;
+  const bw = parseFloat(raw.bodyweight);
+  if (bw >= 30 && bw <= 300) s.bodyweight = bw;
   return s;
 }
 

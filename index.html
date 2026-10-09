@@ -221,6 +221,132 @@
         </div>
       </section>
 
+      <!-- TAB 5: NIVELES DE FUERZA (MAPA MUSCULAR) -->
+      <section id="tab-levels" class="tab-pane">
+        <!-- Intro + peso corporal -->
+        <div class="card">
+          <h3 style="font-size: 1.1rem; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="7" r="3.2"></circle>
+              <path d="M5.5 21v-1.5a6.5 6.5 0 0 1 13 0V21"></path>
+            </svg>
+            Mapa Muscular y Niveles de Fuerza
+          </h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
+            Cada grupo muscular se colorea según tu <strong>nivel de fuerza</strong>: se compara tu mejor marca de cada ejercicio
+            (1RM estimado con la fórmula de Epley: peso × (1 + reps/30)) con los estándares de fuerza de población para tu peso corporal.
+            <strong>Intermedio</strong> equivale aproximadamente a la media de personas que entrenan.
+          </p>
+          <div id="levels-overview" class="levels-overview"></div>
+          <div class="bw-input-row">
+            <label class="form-label" for="level-bodyweight">Tu peso corporal (kg)</label>
+            <input type="number" id="level-bodyweight" class="form-input" min="30" max="300" step="0.5" inputmode="decimal" aria-label="Peso corporal en kilogramos">
+          </div>
+        </div>
+
+        <!-- Figura anatómica -->
+        <div class="card">
+          <div class="body-views">
+            <div class="body-view">
+              <h4>Frontal</h4>
+              <svg viewBox="0 0 120 260" role="img" aria-label="Vista frontal del cuerpo con niveles musculares">
+                <g class="body-base">
+                  <circle cx="60" cy="20" r="12"/>
+                  <rect x="54" y="29" width="12" height="10" rx="3"/>
+                  <path d="M38,44 Q60,39 82,44 L86,60 L82,104 L78,122 L42,122 L38,104 L34,60 Z"/>
+                  <rect x="43" y="116" width="34" height="14" rx="7"/>
+                  <rect x="29.5" y="56" width="11" height="52" rx="5.5"/>
+                  <rect x="79.5" y="56" width="11" height="52" rx="5.5"/>
+                  <rect x="28.5" y="110" width="9" height="38" rx="4.5"/>
+                  <rect x="82.5" y="110" width="9" height="38" rx="4.5"/>
+                  <circle cx="33" cy="153" r="5"/>
+                  <circle cx="87" cy="153" r="5"/>
+                  <rect x="44" y="122" width="16" height="86" rx="8"/>
+                  <rect x="60" y="122" width="16" height="86" rx="8"/>
+                  <rect x="46" y="210" width="12" height="34" rx="6"/>
+                  <rect x="62" y="210" width="12" height="34" rx="6"/>
+                  <ellipse cx="52" cy="250" rx="9" ry="5"/>
+                  <ellipse cx="68" cy="250" rx="9" ry="5"/>
+                </g>
+                <g class="body-muscles">
+                  <ellipse class="body-muscle" data-muscle="Hombro" cx="39" cy="53" rx="8" ry="10" transform="rotate(16 39 53)"/>
+                  <ellipse class="body-muscle" data-muscle="Hombro" cx="81" cy="53" rx="8" ry="10" transform="rotate(-16 81 53)"/>
+                  <path class="body-muscle" data-muscle="Pecho" d="M47,49 C52,46 58,47 59,52 L59,71 C53,76 47,72 46,65 Z"/>
+                  <path class="body-muscle" data-muscle="Pecho" d="M73,49 C68,46 62,47 61,52 L61,71 C67,76 73,72 74,65 Z"/>
+                  <rect class="body-muscle" data-muscle="Core" x="47" y="78" width="12" height="10" rx="3"/>
+                  <rect class="body-muscle" data-muscle="Core" x="61" y="78" width="12" height="10" rx="3"/>
+                  <rect class="body-muscle" data-muscle="Core" x="47" y="90" width="12" height="10" rx="3"/>
+                  <rect class="body-muscle" data-muscle="Core" x="61" y="90" width="12" height="10" rx="3"/>
+                  <rect class="body-muscle" data-muscle="Core" x="47" y="102" width="12" height="10" rx="3"/>
+                  <rect class="body-muscle" data-muscle="Core" x="61" y="102" width="12" height="10" rx="3"/>
+                  <ellipse class="body-muscle" data-muscle="Bíceps" cx="35" cy="76" rx="6.5" ry="12" transform="rotate(7 35 76)"/>
+                  <ellipse class="body-muscle" data-muscle="Bíceps" cx="85" cy="76" rx="6.5" ry="12" transform="rotate(-7 85 76)"/>
+                  <rect class="body-muscle" data-muscle="Pierna" x="46" y="126" width="13" height="66" rx="8"/>
+                  <rect class="body-muscle" data-muscle="Pierna" x="61" y="126" width="13" height="66" rx="8"/>
+                  <rect class="body-muscle" data-muscle="Pierna" x="47" y="212" width="10" height="30" rx="5"/>
+                  <rect class="body-muscle" data-muscle="Pierna" x="63" y="212" width="10" height="30" rx="5"/>
+                </g>
+              </svg>
+            </div>
+            <div class="body-view">
+              <h4>Posterior</h4>
+              <svg viewBox="0 0 120 260" role="img" aria-label="Vista posterior del cuerpo con niveles musculares">
+                <g class="body-base">
+                  <circle cx="60" cy="20" r="12"/>
+                  <rect x="54" y="29" width="12" height="11" rx="3"/>
+                  <path d="M38,44 Q60,39 82,44 L86,60 L82,104 L78,122 L42,122 L38,104 L34,60 Z"/>
+                  <rect x="43" y="112" width="34" height="24" rx="10"/>
+                  <rect x="29.5" y="56" width="11" height="52" rx="5.5"/>
+                  <rect x="79.5" y="56" width="11" height="52" rx="5.5"/>
+                  <rect x="28.5" y="110" width="9" height="38" rx="4.5"/>
+                  <rect x="82.5" y="110" width="9" height="38" rx="4.5"/>
+                  <circle cx="33" cy="153" r="5"/>
+                  <circle cx="87" cy="153" r="5"/>
+                  <rect x="44" y="130" width="16" height="80" rx="8"/>
+                  <rect x="60" y="130" width="16" height="80" rx="8"/>
+                  <rect x="46" y="212" width="12" height="32" rx="6"/>
+                  <rect x="62" y="212" width="12" height="32" rx="6"/>
+                  <ellipse cx="52" cy="250" rx="9" ry="5"/>
+                  <ellipse cx="68" cy="250" rx="9" ry="5"/>
+                </g>
+                <g class="body-muscles">
+                  <path class="body-muscle" data-muscle="Espalda" d="M54,32 L38,46 L47,52 L55,41 Z"/>
+                  <path class="body-muscle" data-muscle="Espalda" d="M66,32 L82,46 L73,52 L65,41 Z"/>
+                  <path class="body-muscle" data-muscle="Espalda" d="M46,42 Q60,37 74,42 L68,55 Q60,59 52,55 Z"/>
+                  <path class="body-muscle" data-muscle="Espalda" d="M36,57 L84,57 L78,88 L60,100 L42,88 Z"/>
+                  <path class="body-muscle" data-muscle="Espalda" d="M48,102 L72,102 L68,120 L52,120 Z"/>
+                  <ellipse class="body-muscle" data-muscle="Tríceps" cx="35" cy="78" rx="6.5" ry="12" transform="rotate(7 35 78)"/>
+                  <ellipse class="body-muscle" data-muscle="Tríceps" cx="85" cy="78" rx="6.5" ry="12" transform="rotate(-7 85 78)"/>
+                  <ellipse class="body-muscle" data-muscle="Pierna" cx="52" cy="128" rx="8.5" ry="10.5"/>
+                  <ellipse class="body-muscle" data-muscle="Pierna" cx="68" cy="128" rx="8.5" ry="10.5"/>
+                  <rect class="body-muscle" data-muscle="Pierna" x="46" y="146" width="13" height="58" rx="8"/>
+                  <rect class="body-muscle" data-muscle="Pierna" x="61" y="146" width="13" height="58" rx="8"/>
+                  <ellipse class="body-muscle" data-muscle="Pierna" cx="52" cy="216" rx="6.5" ry="13"/>
+                  <ellipse class="body-muscle" data-muscle="Pierna" cx="68" cy="216" rx="6.5" ry="13"/>
+                </g>
+              </svg>
+            </div>
+          </div>
+          <div class="level-legend">
+            <span class="legend-item"><span class="legend-dot" style="background:#64748b"></span>Novato</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#38bdf8"></span>Principiante</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#22c55e"></span>Intermedio</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#f59e0b"></span>Avanzado</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#ef4444"></span>Élite</span>
+          </div>
+        </div>
+
+        <!-- Listado por grupo muscular -->
+        <div class="exercises-header">
+          <h4>Nivel por Grupo Muscular</h4>
+        </div>
+        <div id="muscle-levels-list"></div>
+        <p style="font-size: 0.75rem; color: var(--text-dim); margin: 12px 4px 24px;">
+          Los niveles son orientativos: se basan en estándares de fuerza de población adulta y en el mejor registro de tu historial.
+          Los ejercicios sin estándar conocido no cuentan. Actualiza tu peso corporal para ajustar los cálculos.
+        </p>
+      </section>
+
       <!-- TAB 4: AJUSTES Y HERRAMIENTAS -->
       <section id="tab-settings" class="tab-pane">
         
@@ -380,6 +506,15 @@
             <line x1="6" y1="20" x2="6" y2="14"></line>
           </svg>
           <span>Historial</span>
+        </button>
+
+        <button class="nav-item" data-tab="tab-levels">
+          <div class="active-pill"></div>
+          <svg viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="7" r="3.2"></circle>
+            <path d="M5.5 21v-1.5a6.5 6.5 0 0 1 13 0V21"></path>
+          </svg>
+          <span>Niveles</span>
         </button>
 
         <button class="nav-item" data-tab="tab-settings">
@@ -633,7 +768,8 @@
     <span id="toast-message">Mensaje</span>
   </div>
 
-  <!-- App Script -->
+  <!-- App Scripts -->
+  <script src="js/standards.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

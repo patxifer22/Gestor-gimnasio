@@ -1177,3 +1177,137 @@ html, body {
   color: var(--text-muted);
   text-transform: uppercase;
 }
+
+/* ============================================================
+   Section 4: Muscle Map & Strength Levels (tab "Niveles")
+   ============================================================ */
+
+.levels-overview {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin-top: 10px;
+}
+
+.bw-input-row {
+  max-width: 180px;
+  margin-top: 12px;
+}
+
+.body-views {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.body-view {
+  flex: 1;
+  text-align: center;
+  max-width: 50%;
+}
+
+.body-view h4 {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.body-view svg {
+  width: 100%;
+  max-width: 150px;
+  height: auto;
+}
+
+.body-base {
+  fill: #1e293b;
+  stroke: #24324c;
+  stroke-width: 1;
+}
+
+.body-muscle {
+  fill: #24324c;
+  stroke: #0b0f19;
+  stroke-width: 0.8;
+  transition: fill 0.3s ease;
+}
+
+.body-muscle.no-data {
+  opacity: 0.55;
+}
+
+.level-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 14px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.muscle-level-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.muscle-level-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.muscle-level-best {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+.muscle-level-right {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.level-dots {
+  display: inline-flex;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.level-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+}
+
+.level-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+}

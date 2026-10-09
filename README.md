@@ -32,6 +32,12 @@ Una aplicación móvil moderna diseñada como **PWA (Progressive Web App)** para
 - **Copias de Seguridad**: Exporta e importa tus datos en formato `.json` cuando quieras para respaldar o transferir a otro teléfono.
 - **Funcionamiento sin conexión**: El Service Worker integrado permite usar la app dentro del gimnasio incluso sin cobertura móvil ni Wi-Fi.
 
+### 5. 💪 Mapa Muscular y Niveles de Fuerza
+- **Figura anatómica frontal y posterior**: cada grupo muscular se colorea según tu nivel de fuerza real.
+- **5 niveles por músculo** (Novato → Principiante → Intermedio → Avanzado → Élite), calculados comparando tu mejor marca de cada ejercicio (1RM estimado con la fórmula de Epley) contra estándares de fuerza de población según tu peso corporal.
+- **Referencia poblacional**: "Intermedio" equivale aproximadamente a la media de personas entrenadas en ese ejercicio.
+- **Ajustable**: configura tu peso corporal directamente en la pestaña y los niveles se recalculan al instante.
+
 ---
 
 ## 🚀 Cómo Ejecutar y Probar la App
