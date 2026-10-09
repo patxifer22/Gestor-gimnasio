@@ -11,6 +11,14 @@ import webbrowser
 import os
 import sys
 
+# La consola de Windows usa cp1252 por defecto, que no soporta los emojis
+# del banner: forzamos UTF-8 en la salida para evitar UnicodeEncodeError.
+if sys.stdout and hasattr(sys.stdout, 'reconfigure'):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
+
 PORT = 8000
 
 def get_local_ip():
