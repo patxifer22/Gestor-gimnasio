@@ -37,6 +37,7 @@ Una aplicación móvil moderna diseñada como **PWA (Progressive Web App)** para
 - **5 niveles por músculo** (Novato → Principiante → Intermedio → Avanzado → Élite), calculados comparando tu mejor marca de cada ejercicio (1RM estimado con la fórmula de Epley) contra estándares de fuerza de población según tu peso corporal.
 - **Referencia poblacional**: "Intermedio" equivale aproximadamente a la media de personas entrenadas en ese ejercicio.
 - **Ajustable**: configura tu peso corporal directamente en la pestaña y los niveles se recalculan al instante.
+- **Desglose por ejercicio**: el nivel del grupo es el de tu mejor levantamiento, pero al tocar un grupo muscular se despliega la lista de todos sus ejercicios con el nivel individual de cada uno.
 
 ---
 

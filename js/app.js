@@ -1717,16 +1717,24 @@ function computeMuscleLevels() {
     });
   });
 
-  // Agregar por grupo muscular (gana el nivel más alto del grupo)
+  // Evaluar cada ejercicio y agruparlo por músculo
+  const byMuscle = {};
   Object.keys(bestByKey).forEach(key => {
     const entry = bestByKey[key];
     let muscle = MUSCLE_ORDER.indexOf(entry.muscle) !== -1 ? entry.muscle : entry.std.muscle;
     if (MUSCLE_ORDER.indexOf(muscle) === -1) return;
     const level = levelForStandard(entry.std, entry.metric, bw);
-    const current = groups[muscle];
-    if (!current || level > current.level) {
-      groups[muscle] = { level: level, best: entry };
-    }
+    if (!byMuscle[muscle]) byMuscle[muscle] = [];
+    byMuscle[muscle].push({ name: entry.name, metric: entry.metric, std: entry.std, level: level });
+  });
+
+  // Nivel del grupo = el más alto de sus ejercicios (el mejor levantamiento
+  // representa al músculo), conservando el desglose completo para el detalle
+  MUSCLE_ORDER.forEach(m => {
+    const list = byMuscle[m];
+    if (!list || list.length === 0) return;
+    list.sort((a, b) => (b.level - a.level) || (b.metric - a.metric));
+    groups[m] = { level: list[0].level, best: list[0], exercises: list };
   });
 
   return groups;
@@ -1776,25 +1784,67 @@ function renderLevelsTab() {
         }
       }
 
+      // Desglose: nivel individual de cada ejercicio del grupo
+      let detailRows = '';
+      info.exercises.forEach(exr => {
+        const exLvl = STRENGTH_LEVELS[exr.level - 1];
+        const exMetric = exr.std.type === 'reps'
+          ? `${exr.metric} reps`
+          : `1RM est. ${Math.round(exr.metric)} kg`;
+        detailRows += `
+          <div class="muscle-ex-row">
+            <div>
+              <div class="muscle-ex-name">${escapeHtml(exr.name)}</div>
+              <div class="muscle-ex-metric">${escapeHtml(exMetric)}</div>
+            </div>
+            <span class="level-chip" style="color:${exLvl.color}; background:${exLvl.color}1F; border-color:${exLvl.color}55;">${exLvl.name}</span>
+          </div>`;
+      });
+
+      card.className = 'muscle-level-card expandable';
+      card.setAttribute('role', 'button');
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('aria-expanded', 'false');
+      card.title = 'Ver desglose por ejercicio';
+
       card.innerHTML = `
-        <div class="muscle-level-info">
-          <div class="muscle-level-name">${escapeHtml(muscle)}</div>
-          <div class="muscle-level-best">${escapeHtml(info.best.name)} · ${escapeHtml(metricText)}</div>
+        <div class="muscle-level-main">
+          <div class="muscle-level-info">
+            <div class="muscle-level-name">${escapeHtml(muscle)}</div>
+            <div class="muscle-level-best">${escapeHtml(info.best.name)} · ${escapeHtml(metricText)} · ${info.exercises.length} ejercicio${info.exercises.length === 1 ? '' : 's'}</div>
+          </div>
+          <div class="muscle-level-right">
+            <span class="level-dots">${dots}</span>
+            <span class="level-label" style="color:${lvl.color}">${lvl.name} ▾</span>
+          </div>
         </div>
-        <div class="muscle-level-right">
-          <span class="level-dots">${dots}</span>
-          <span class="level-label" style="color:${lvl.color}">${lvl.name}</span>
+        <div class="muscle-level-detail">
+          ${detailRows}
         </div>
       `;
+
+      const toggleDetail = () => {
+        const open = card.classList.toggle('open');
+        card.setAttribute('aria-expanded', open ? 'true' : 'false');
+      };
+      card.addEventListener('click', toggleDetail);
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggleDetail();
+        }
+      });
     } else {
       card.innerHTML = `
-        <div class="muscle-level-info">
-          <div class="muscle-level-name">${escapeHtml(muscle)}</div>
-          <div class="muscle-level-best">Sin registros de ejercicios con estándar conocido</div>
-        </div>
-        <div class="muscle-level-right">
-          <span class="level-dots">${'<span class="level-dot"></span>'.repeat(5)}</span>
-          <span class="level-label" style="color:var(--text-dim);">Sin datos</span>
+        <div class="muscle-level-main">
+          <div class="muscle-level-info">
+            <div class="muscle-level-name">${escapeHtml(muscle)}</div>
+            <div class="muscle-level-best">Sin registros de ejercicios con estándar conocido</div>
+          </div>
+          <div class="muscle-level-right">
+            <span class="level-dots">${'<span class="level-dot"></span>'.repeat(5)}</span>
+            <span class="level-label" style="color:var(--text-dim);">Sin datos</span>
+          </div>
         </div>
       `;
     }
