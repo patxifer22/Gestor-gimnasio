@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="Planifica tu rutina semanal de gimnasio y registra el progreso de cada entrenamiento. 100% offline, sin cuentas y sin anuncios.">
+  <title>FitTrack - Rutina de Gimnasio</title>
+  
+  <!-- PWA Meta Tags -->
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="FitTrack">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icons/favicon.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div id="app-container">
+    <!-- App Header -->
+    <header class="app-header">
+      <div class="brand-wrapper">
+        <img src="icons/favicon.png" alt="FitTrack Logo" class="brand-logo">
+        <span class="brand-title">FitTrack</span>
+        <span class="brand-badge" id="app-version-badge">GYM</span>
+      </div>
+      <div class="header-actions">
+        <button id="btn-header-action" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem; min-height: 34px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
+          Plantillas
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Views Container -->
+    <main class="main-view">
+      
+      <!-- TAB 1: RUTINA SEMANAL -->
+      <section id="tab-routine" class="tab-pane active">
+        <!-- Week Day Strip Selector -->
+        <div class="week-strip" id="week-strip">
+          <!-- Populated dynamically: Lun, Mar, Mié, Jue, Vie, Sáb, Dom -->
+        </div>
+
+        <!-- Selected Day Info Card -->
+        <div class="card" id="day-detail-card">
+          <!-- Day summary header -->
+          <div class="day-header-card">
+            <div class="day-header-info">
+              <div class="day-title-row">
+                <span class="day-name-badge" id="selected-day-badge">LUNES</span>
+                <span id="selected-day-tag" class="badge badge-muscle">ENTRENAMIENTO</span>
+              </div>
+              <h2 class="day-routine-name" id="selected-day-title">Pecho y Tríceps</h2>
+              <p class="day-routine-desc" id="selected-day-desc">Fuerza e hipertrofia de empuje</p>
+            </div>
+            <button id="btn-edit-day" class="btn-icon" title="Editar día" aria-label="Editar día">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Quick Action to start workout for this day -->
+          <button id="btn-start-from-routine" class="btn btn-primary btn-block" style="margin-top: 10px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <span id="btn-start-text">Iniciar Entrenamiento de Hoy</span>
+          </button>
+        </div>
+
+        <!-- Rest Day View (Hidden by default, shown if day is rest) -->
+        <div id="rest-day-view" class="rest-day-card" style="display: none;">
+          <div class="rest-icon-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+            </svg>
+          </div>
+          <h3>Día de Descanso y Recuperación</h3>
+          <p>El descanso es fundamental para el crecimiento muscular y la recuperación del sistema nervioso.</p>
+          <button id="btn-convert-to-training" class="btn btn-secondary">
+            Cambiar a Día de Entrenamiento
+          </button>
+        </div>
+
+        <!-- Exercises List Container -->
+        <div id="exercises-container">
+          <div class="exercises-header">
+            <h4>Ejercicios Programados (<span id="exercise-count">0</span>)</h4>
+            <button id="btn-add-exercise" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem; min-height: 32px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              Añadir Ejercicio
+            </button>
+          </div>
+
+          <div id="exercises-list">
+            <!-- Exercise cards rendered here -->
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: ENTRENAR (WORKOUT TRACKER) -->
+      <section id="tab-workout" class="tab-pane">
+        
+        <!-- State A: No Active Workout -->
+        <div id="no-workout-state">
+          <div class="card" style="text-align: center; padding: 32px 16px;">
+            <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(34, 197, 94, 0.15); color: var(--primary); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M6 5v14M18 5v14M2 9v6M22 9v6M6 12h12M2 12h4M18 12h4"></path>
+              </svg>
+            </div>
+            <h2 style="font-size: 1.35rem; margin-bottom: 6px;">¿Listo para entrenar?</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px;">
+              Registra cada serie, peso y repetición en tiempo real con temporizador de descanso automático.
+            </p>
+
+            <button id="btn-launch-today" class="btn btn-primary btn-block" style="margin-bottom: 12px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+              Iniciar Rutina de Hoy (<span id="today-routine-name">Cargando...</span>)
+            </button>
+
+            <div style="display: flex; gap: 10px;">
+              <button id="btn-select-day-workout" class="btn btn-secondary" style="flex: 1;">
+                Otro Día
+              </button>
+              <button id="btn-start-empty-workout" class="btn btn-secondary" style="flex: 1;">
+                Entrenamiento Libre
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- State B: Active Workout Session in Progress -->
+        <div id="active-workout-state" style="display: none;">
+          <!-- Top Sticky Banner -->
+          <div class="active-session-banner">
+            <div>
+              <div style="font-size: 0.75rem; font-weight: 700; color: var(--primary); text-transform: uppercase;">
+                SESIÓN EN CURSO
+              </div>
+              <h3 id="session-title" style="font-size: 1.15rem; font-weight: 800;">Pecho y Tríceps</h3>
+              <div class="session-progress-bar">
+                <div id="session-progress-fill" class="session-progress-fill"></div>
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <div class="session-timer-display" id="session-live-clock">00:00</div>
+              <div style="display: flex; gap: 8px; margin-top: 4px;">
+                <button id="btn-finish-workout" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem; min-height: 32px;">
+                  Terminar
+                </button>
+                <button id="btn-cancel-workout" class="btn btn-danger" style="padding: 6px 10px; font-size: 0.8rem; min-height: 32px;" title="Descartar" aria-label="Descartar entrenamiento">
+                  ✕
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive workout exercises container -->
+          <div id="active-exercises-list">
+            <!-- Rendered sets and inputs -->
+          </div>
+
+          <!-- Add Exercise to current live workout -->
+          <button id="btn-add-exercise-to-session" class="btn btn-secondary btn-block" style="margin-top: 14px; margin-bottom: 24px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Añadir Ejercicio a la Sesión
+          </button>
+        </div>
+
+      </section>
+
+      <!-- TAB 3: HISTORIAL -->
+      <section id="tab-history" class="tab-pane">
+        <!-- Quick stats summary -->
+        <div class="history-stats-grid">
+          <div class="history-stat-card">
+            <span class="history-stat-label">Entrenamientos</span>
+            <div class="history-stat-val" id="stat-total-workouts">0</div>
+          </div>
+          <div class="history-stat-card">
+            <span class="history-stat-label">Volumen Total</span>
+            <div class="history-stat-val" id="stat-total-volume">0 <span>kg</span></div>
+          </div>
+          <div class="history-stat-card">
+            <span class="history-stat-label">Series Completadas</span>
+            <div class="history-stat-val" id="stat-total-sets">0</div>
+          </div>
+          <div class="history-stat-card">
+            <span class="history-stat-label">Tiempo Total</span>
+            <div class="history-stat-val" id="stat-total-time">0 <span>h</span></div>
+          </div>
+        </div>
+
+        <div class="exercises-header">
+          <h4>Registro de Sesiones</h4>
+          <span style="font-size: 0.75rem; color: var(--text-dim);" id="history-total-count">0 registros</span>
+        </div>
+
+        <!-- History list container -->
+        <div id="history-list">
+          <!-- Dynamic workout history cards -->
+        </div>
+      </section>
+
+      <!-- TAB 4: AJUSTES Y HERRAMIENTAS -->
+      <section id="tab-settings" class="tab-pane">
+        
+        <!-- App Settings -->
+        <div class="card">
+          <h3 style="font-size: 1.1rem; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            Preferencias de Entrenamiento
+          </h3>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-color);">
+            <div>
+              <div style="font-weight: 600;">Sonido de Temporizador</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Aviso sonoro al terminar el descanso</div>
+            </div>
+            <label style="position: relative; display: inline-block; width: 48px; height: 26px;">
+              <input type="checkbox" id="setting-sound" checked style="opacity: 0; width: 0; height: 0;" aria-label="Sonido del temporizador">
+              <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-color); border-radius: 34px; transition: .2s;" id="switch-sound-slider"></span>
+            </label>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-color);">
+            <div>
+              <div style="font-weight: 600;">Vibración Táctil</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Vibrar en teléfonos compatibles</div>
+            </div>
+            <label style="position: relative; display: inline-block; width: 48px; height: 26px;">
+              <input type="checkbox" id="setting-vibrate" checked style="opacity: 0; width: 0; height: 0;" aria-label="Vibración táctil">
+              <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-color); border-radius: 34px; transition: .2s;" id="switch-vibrate-slider"></span>
+            </label>
+          </div>
+
+          <div style="padding: 12px 0;">
+            <label class="form-label" for="setting-default-rest">Descanso Predeterminado (segundos)</label>
+            <select id="setting-default-rest" class="form-select">
+              <option value="45">45 segundos</option>
+              <option value="60">60 segundos (1 min)</option>
+              <option value="90" selected>90 segundos (1.5 min)</option>
+              <option value="120">120 segundos (2 min)</option>
+              <option value="180">180 segundos (3 min)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Backup and Data Management -->
+        <div class="card">
+          <h3 style="font-size: 1.1rem; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Copia de Seguridad y Datos
+          </h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
+            Todos tus entrenamientos y rutinas están guardados de forma segura en este dispositivo. Puedes exportarlos a un archivo JSON para tener un respaldo o cambiar de teléfono.
+          </p>
+
+          <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+            <button id="btn-export-data" class="btn btn-secondary" style="flex: 1;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              Exportar (JSON)
+            </button>
+            <button id="btn-import-trigger" class="btn btn-secondary" style="flex: 1;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              Importar (JSON)
+            </button>
+            <input type="file" id="file-import-input" accept=".json" style="display: none;">
+          </div>
+
+          <button id="btn-reset-demo" class="btn btn-danger btn-block" style="font-size: 0.8rem; min-height: 36px;">
+            Restablecer Rutinas de Ejemplo
+          </button>
+        </div>
+
+        <!-- How to install on mobile guide -->
+        <div class="card" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9));">
+          <h3 style="font-size: 1.1rem; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+              <line x1="12" y1="18" x2="12.01" y2="18"></line>
+            </svg>
+            Instalar en tu Teléfono Móvil
+          </h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5;">
+            Esta aplicación está diseñada como <strong>PWA (Progressive Web App)</strong>. Puedes usarla a pantalla completa sin barras de navegador e incluso sin conexión:
+          </p>
+          <ul style="font-size: 0.82rem; color: #cbd5e1; padding-left: 18px; line-height: 1.6; margin-bottom: 12px;">
+            <li><strong>Android (Chrome):</strong> Toca el menú de 3 puntos arriba a la derecha y selecciona <em>"Añadir a pantalla de inicio"</em> o <em>"Instalar aplicación"</em>.</li>
+            <li><strong>iPhone (Safari):</strong> Toca el botón de Compartir (icono cuadrado con flecha hacia arriba) y elige <em>"Añadir a la pantalla de inicio"</em>.</li>
+          </ul>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Floating Rest Timer (Appears during active workout rest) -->
+    <div id="floating-rest-timer" class="floating-rest-timer" style="display: none;">
+      <div class="rest-timer-info">
+        <div>
+          <div class="rest-timer-label">Tiempo de descanso</div>
+          <div class="rest-timer-clock" id="rest-clock-display">01:30</div>
+        </div>
+      </div>
+      <div class="rest-timer-controls">
+        <button id="btn-timer-add30" class="btn btn-secondary" style="padding: 6px 10px; font-size: 0.75rem; min-height: 34px;">
+          +30s
+        </button>
+        <button id="btn-timer-pause" class="btn btn-secondary" style="padding: 6px 10px; font-size: 0.75rem; min-height: 34px;" aria-label="Pausar o reanudar descanso">
+          ⏸
+        </button>
+        <button id="btn-timer-skip" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.75rem; min-height: 34px;">
+          Saltar ✓
+        </button>
+      </div>
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+      <div class="nav-inner">
+        <button class="nav-item active" data-tab="tab-routine">
+          <div class="active-pill"></div>
+          <svg viewBox="0 0 24 24" fill="none">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <span>Rutina</span>
+        </button>
+
+        <button class="nav-item" data-tab="tab-workout" id="nav-btn-workout">
+          <div class="active-pill"></div>
+          <span class="workout-pulse-badge" id="nav-workout-pulse" style="display: none;"></span>
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M6 5v14M18 5v14M2 9v6M22 9v6M6 12h12M2 12h4M18 12h4"></path>
+          </svg>
+          <span>Entrenar</span>
+        </button>
+
+        <button class="nav-item" data-tab="tab-history">
+          <div class="active-pill"></div>
+          <svg viewBox="0 0 24 24" fill="none">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          <span>Historial</span>
+        </button>
+
+        <button class="nav-item" data-tab="tab-settings">
+          <div class="active-pill"></div>
+          <svg viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Ajustes</span>
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  <!-- ============================================================
+       MODALS & BOTTOM SHEETS
+       ============================================================ -->
+
+  <!-- Modal 1: Add/Edit Exercise -->
+  <div class="modal-backdrop" id="modal-exercise">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3 id="modal-exercise-title">Añadir Ejercicio</h3>
+        <button class="btn-icon btn-close-modal" aria-label="Cerrar" data-close="modal-exercise">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-exercise">
+          <input type="hidden" id="ex-edit-id">
+
+          <div class="form-group">
+            <label class="form-label" for="ex-name">Nombre del Ejercicio *</label>
+            <input type="text" id="ex-name" class="form-input" placeholder="Ej. Press Banca con Barra" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Grupo Muscular</label>
+            <div class="chip-group" id="muscle-chip-group">
+              <span class="chip-option selected" data-val="Pecho">Pecho</span>
+              <span class="chip-option" data-val="Espalda">Espalda</span>
+              <span class="chip-option" data-val="Pierna">Pierna</span>
+              <span class="chip-option" data-val="Hombro">Hombro</span>
+              <span class="chip-option" data-val="Bíceps">Bíceps</span>
+              <span class="chip-option" data-val="Tríceps">Tríceps</span>
+              <span class="chip-option" data-val="Core">Core / Abdomen</span>
+              <span class="chip-option" data-val="Cardio">Cardio</span>
+            </div>
+            <input type="hidden" id="ex-muscle" value="Pecho">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="ex-sets">Series (Sets)</label>
+              <input type="number" id="ex-sets" class="form-input" min="1" max="20" value="4" inputmode="numeric">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="ex-reps">Reps Objetivo</label>
+              <input type="text" id="ex-reps" class="form-input" placeholder="Ej. 8-10" value="8-10">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="ex-weight">Peso Inicial (kg)</label>
+              <input type="number" step="0.5" id="ex-weight" class="form-input" placeholder="0" value="0" inputmode="decimal">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="ex-rest">Descanso (seg)</label>
+              <input type="number" step="5" id="ex-rest" class="form-input" value="90" inputmode="numeric">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="ex-notes">Notas / Indicaciones técnicas (opcional)</label>
+            <input type="text" id="ex-notes" class="form-input" placeholder="Ej. Pausa de 1 seg en el pecho, foco excéntrico">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-close-modal" data-close="modal-exercise" style="flex: 1;">Cancelar</button>
+        <button id="btn-save-exercise" class="btn btn-primary" style="flex: 1;">Guardar Ejercicio</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Edit Day Configuration -->
+  <div class="modal-backdrop" id="modal-day">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3 id="modal-day-title">Configurar Día</h3>
+        <button class="btn-icon btn-close-modal" aria-label="Cerrar" data-close="modal-day">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-day">
+          <div class="form-group">
+            <label class="form-label" for="day-title-input">Nombre de la Rutina *</label>
+            <input type="text" id="day-title-input" class="form-input" placeholder="Ej. Pecho y Tríceps (Empuje)" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="day-desc-input">Descripción / Enfoque</label>
+            <input type="text" id="day-desc-input" class="form-input" placeholder="Ej. Fuerza en básicos y bombeo en accesorios">
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0;">
+            <div>
+              <div style="font-weight: 700;">¿Es día de descanso?</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Sin ejercicios asignados</div>
+            </div>
+            <label style="position: relative; display: inline-block; width: 48px; height: 26px;">
+              <input type="checkbox" id="day-is-rest-check" style="opacity: 0; width: 0; height: 0;">
+              <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-color); border-radius: 34px; transition: .2s;" id="switch-rest-slider"></span>
+            </label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-close-modal" data-close="modal-day" style="flex: 1;">Cancelar</button>
+        <button id="btn-save-day" class="btn btn-primary" style="flex: 1;">Guardar Cambios</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Routine Templates Picker -->
+  <div class="modal-backdrop" id="modal-templates">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3>Plantillas de Rutina</h3>
+        <button class="btn-icon btn-close-modal" aria-label="Cerrar" data-close="modal-templates">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
+          Selecciona una plantilla predefinida para organizar tu semana con un clic. Puedes personalizarla después.
+        </p>
+
+        <div class="card template-item" data-template="ppl" style="cursor: pointer; margin-bottom: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <strong style="font-size: 1rem; color: var(--primary-light);">Push / Pull / Legs (PPL)</strong>
+            <span class="badge badge-muscle">6 Días</span>
+          </div>
+          <p style="font-size: 0.8rem; color: var(--text-muted);">
+            Lunes: Empuje (Pecho/Tríceps) | Martes: Tirón (Espalda/Bíceps) | Miércoles: Pierna | Repite Jue-Sáb | Domingo: Descanso.
+          </p>
+        </div>
+
+        <div class="card template-item" data-template="upper_lower" style="cursor: pointer; margin-bottom: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <strong style="font-size: 1rem; color: var(--primary-light);">Torso / Pierna</strong>
+            <span class="badge badge-muscle">4 Días</span>
+          </div>
+          <p style="font-size: 0.8rem; color: var(--text-muted);">
+            Lunes: Torso A | Martes: Pierna A | Miércoles: Descanso | Jueves: Torso B | Viernes: Pierna B | Fin de semana: Descanso.
+          </p>
+        </div>
+
+        <div class="card template-item" data-template="full_body" style="cursor: pointer; margin-bottom: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <strong style="font-size: 1rem; color: var(--primary-light);">Cuerpo Completo (Full Body)</strong>
+            <span class="badge badge-muscle">3 Días</span>
+          </div>
+          <p style="font-size: 0.8rem; color: var(--text-muted);">
+            Lunes, Miércoles y Viernes: Todo el cuerpo con ejercicios compuestos | Mar, Jue, Sáb, Dom: Descanso.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: Select Day for Workout -->
+  <div class="modal-backdrop" id="modal-select-day">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3>Elegir Rutina a Iniciar</h3>
+        <button class="btn-icon btn-close-modal" aria-label="Cerrar" data-close="modal-select-day">✕</button>
+      </div>
+      <div class="modal-body" id="select-day-list">
+        <!-- Render day buttons -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 5: Workout Completed Celebration / Summary -->
+  <div class="modal-backdrop" id="modal-workout-summary">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3>¡Entrenamiento Completado!</h3>
+        <button class="btn-icon btn-close-modal" aria-label="Cerrar" data-close="modal-workout-summary">✕</button>
+      </div>
+      <div class="modal-body celebration-modal">
+        <div class="celebration-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+        <h2 id="summary-workout-name">Pecho y Tríceps</h2>
+        <p style="color: var(--text-muted); font-size: 0.85rem;">Gran trabajo completando la sesión.</p>
+
+        <div class="summary-stats-box">
+          <div>
+            <div class="summary-stat-val" id="summary-duration">00:00</div>
+            <div class="summary-stat-lbl">Duración</div>
+          </div>
+          <div>
+            <div class="summary-stat-val" id="summary-volume">0 kg</div>
+            <div class="summary-stat-lbl">Volumen</div>
+          </div>
+          <div>
+            <div class="summary-stat-val" id="summary-sets">0</div>
+            <div class="summary-stat-lbl">Series Hechas</div>
+          </div>
+        </div>
+
+        <div class="form-group" style="text-align: left;">
+          <label class="form-label" for="summary-notes">Notas de la sesión (sensaciones, PRs)</label>
+          <input type="text" id="summary-notes" class="form-input" placeholder="Ej. Muy buenas sensaciones en press inclinado">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-save-summary" class="btn btn-primary btn-block">
+          Guardar y Registrar Sesión
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 6: View Past Workout Detail -->
+  <div class="modal-backdrop" id="modal-history-detail">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <div style="flex: 1;">
+          <h3 id="history-detail-title">Detalle del Entrenamiento</h3>
+          <div id="history-detail-date" style="font-size: 0.75rem; color: var(--text-muted);">Fecha</div>
+        </div>
+        <button class="btn-icon btn-close-modal" aria-label="Cerrar" data-close="modal-history-detail">✕</button>
+      </div>
+      <div class="modal-body" id="history-detail-content">
+        <!-- Render details -->
+      </div>
+      <div class="modal-footer" style="justify-content: space-between;">
+        <button id="btn-delete-history-item" class="btn btn-danger" style="flex: 1;">
+          Eliminar Registro
+        </button>
+        <button class="btn btn-secondary btn-close-modal" data-close="modal-history-detail" style="flex: 1;">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="toast">
+    <span id="toast-message">Mensaje</span>
+  </div>
+
+  <!-- App Script -->
+  <script src="js/app.js"></script>
+</body>
+</html>

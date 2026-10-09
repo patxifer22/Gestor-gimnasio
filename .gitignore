@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Node (por si se añade tooling en el futuro)
+node_modules/
+
+# Editores / IDE
+.vscode/
+.idea/
